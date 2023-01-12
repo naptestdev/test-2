@@ -1,8 +1,8 @@
 import { randomAvatar } from "./utils";
 
-const data = new Array(10).fill("").map((_, index) => ({
+const data = new Array(30).fill("").map((_, index) => ({
   id: index,
-  name: "Nguyễn Văn A",
+  name: `Nguyễn Văn ${String.fromCharCode(65 + (index % (90 - 65 + 1)))}`,
   class: "SH-C4K-SB71",
   exp: 2345 - index,
   newStatus: (index % 3 === 0 ? "up" : index % 3 === 1 ? "down" : "equal") as
@@ -53,7 +53,7 @@ export default function App() {
                   alt=""
                 />
               </div>
-              <p className="text-center text-lg mt-1">Nguyễn Văn A</p>
+              <p className="text-center text-lg mt-1">{item.name}</p>
               <h1
                 className={`${
                   ["text-red", "text-yellow", "text-orange"][index]
