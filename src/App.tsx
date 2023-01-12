@@ -1,8 +1,10 @@
+import { randomAvatar } from "./utils";
+
 const data = new Array(10).fill("").map((_, index) => ({
   id: index,
   name: "Nguyễn Văn A",
   class: "SH-C4K-SB71",
-  exp: 2345,
+  exp: 2345 - index,
   newStatus: (index % 3 === 0 ? "up" : index % 3 === 1 ? "down" : "equal") as
     | "up"
     | "down"
@@ -11,100 +13,76 @@ const data = new Array(10).fill("").map((_, index) => ({
 
 export default function App() {
   return (
-    <div className="w-full h-full max-w-[320px] max-h-[568px] bg-red flex flex-col rounded-[25px] overflow-hidden">
-      <div className="w-full h-full overflow-auto">
-        <h1 className="text-center my-3">Global Ranking</h1>
-        <div className="flex justify-center">
-          <div className="border border-gray-300 rounded-full flex gap-4 px-3 py-[2px]">
-            <button>Scratch</button>
-            <button>Game</button>
-            <button>Web</button>
-          </div>
-        </div>
-        <div className="bg-[#ffffff1a] rounded-full flex [&>button]:flex-grow [&>button]:py-1 [&>button]:rounded-full my-3 mx-4">
-          <button className="bg-white text-red">1</button>
-          <button>2</button>
-          <button>3</button>
-          <button>4</button>
-          <button>5</button>
-          <button>6</button>
-          <button>7</button>
-          <button>8</button>
-        </div>
-        <div className="flex justify-center items-end gap-4">
-          <div className="flex flex-col items-center">
-            <div className="w-[48px] relative pb-1">
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 leading-[1] text-[12px] h-[12px] w-[12px] text-center text-red bg-third rounded-full border border-red box-content">
-                3
-              </div>
-              <div className="w-[48px] h-[48px] border-[3.7px] border-third rounded-full flex justify-center items-center">
-                <img src="/avatar.svg" className="w-[21px] h-[21px]" alt="" />
-              </div>
-            </div>
-            <p className="text-center text-[10px] mt-1 max-w-[55px]">
-              Nguyễn Văn A
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center relative pt-[23px]">
-            <img
-              className="absolute left-1/2 -translate-x-1/2 top-0 w-[54px] h-[46px]"
-              src="/crown.svg"
-              alt=""
-            />
-            <div className="w-[89px] relative pb-1">
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 leading-[1] text-[12px] h-[12px] w-[12px] text-center text-red bg-first rounded-full border border-red box-content">
-                1
-              </div>
-              <div className="w-[89px] h-[89px] border-[3.7px] border-first rounded-full flex justify-center items-center">
+    <div className="w-full max-w-4xl">
+      <div>
+        <h1 className="text-3xl md:text-5xl mt-8 mb-4 md:mt-16 md:mb-8">
+          Global Ranking
+        </h1>
+      </div>
+      <div className="flex gap-5">
+        {[data[1], data[0], data[2]].map((item, index) => (
+          <div
+            key={item.id}
+            className="flex-grow flex flex-col justify-end items-center"
+          >
+            <div className="flex flex-col items-center relative pt-[40px]">
+              {index === 1 && (
                 <img
-                  src="/avatar.svg"
-                  className="w-[38px] h-[38px] mt-2"
+                  className="absolute left-1/2 -translate-x-1/2 top-0 w-[54px] h-[46px] z-10"
+                  src="/crown.svg"
+                  alt=""
+                />
+              )}
+              <div className="pb-1 relative">
+                <div
+                  className={`absolute bottom-0 left-1/2 -translate-x-1/2 leading-[16px] text-[12px] h-[16px] w-[16px] text-center text-white ${
+                    ["bg-red", "bg-yellow", "bg-orange"][index]
+                  } rounded-full box-content`}
+                >
+                  {[2, 1, 3][index]}
+                </div>
+                <img
+                  src={randomAvatar(`${item.name} ${item.id}`)}
+                  className={`${
+                    index === 1
+                      ? "w-[80px] h-[80px] md:w-[120px] md:h-[120px]"
+                      : "w-[60px] h-[60px] md:w-[90px] md:h-[90px]"
+                  } rounded-full border-4 ${
+                    ["border-red", "border-yellow", "border-orange"][index]
+                  }`}
                   alt=""
                 />
               </div>
-            </div>
-            <p className="text-center text-[10px] mt-1 max-w-[55px]">
-              Nguyễn Văn A
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div className="w-[55px] relative pb-1">
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 leading-[1] text-[12px] h-[12px] w-[12px] text-center text-red bg-second rounded-full border border-red box-content">
-                3
-              </div>
-              <div className="w-[55px] h-[55px] border-[3.7px] border-second rounded-full flex justify-center items-center">
-                <img src="/avatar.svg" className="w-[21px] h-[21px]" alt="" />
-              </div>
-            </div>
-            <p className="text-center text-[10px] mt-1 max-w-[55px]">
-              Nguyễn Văn A
-            </p>
-          </div>
-        </div>
-
-        <div className="flex justify-center">
-          <div className="flex flex-col gap-2 w-full max-w-[284px] py-[25px]">
-            <div className="flex text-[10px]">
-              <span className="pl-[42px]">#</span>
-              <span className="pl-[136px]">Badge</span>
-              <span className="pl-[4px]">Pts</span>
-            </div>
-            {data.map((item, index) => (
-              <div
-                className={`border-2 h-[45px] rounded-full flex-shrink-0 flex items-center pl-3 pr-2 text-black ${
-                  index === 0
-                    ? "bg-[linear-gradient(94.05deg,_#FFCC30_-29.95%,_#FEFFD1_99.59%)] border-[#68FFF6]"
-                    : index === 1
-                    ? "bg-[linear-gradient(95.69deg,_#DDFFFD_21.87%,_#FFFFFF_87.66%)] border-[#68FFF6]"
-                    : index === 2
-                    ? "bg-[linear-gradient(93.62deg,_#FFDECC_-5.49%,_#FFFFFF_88.67%)] border-[#7B61FF]"
-                    : "bg-white border-[#C02222]"
+              <p className="text-center text-lg mt-1">Nguyễn Văn A</p>
+              <h1
+                className={`${
+                  ["text-red", "text-yellow", "text-orange"][index]
                 }`}
-                key={item.id}
               >
-                <div className="w-[18px] h-[18px] flex justify-center items-center">
+                {item.exp} exp
+              </h1>
+            </div>
+          </div>
+        ))}
+      </div>
+      <table className="w-full border-separate [&_th]:!text-left border-spacing-y-3 my-5">
+        <thead>
+          <tr>
+            <th></th>
+            <th>#</th>
+            <th></th>
+            <th>Badge</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, index) => (
+            <tr
+              className="shadow-[0_2px_10px_rgb(0_0_0_/_10%)] rounded-2xl"
+              key={item.id}
+            >
+              <td>
+                <div className="w-[24px] md:w-[34px] h-[18px] flex justify-end items-center">
                   <img
                     src={
                       item.newStatus === "up"
@@ -117,28 +95,28 @@ export default function App() {
                     alt=""
                   />
                 </div>
-                <p className="pl-2 pr-3 text-[20px] w-[16px] box-content">
-                  {index + 1}
-                </p>
-                <div className="flex-grow flex-shrink-0">
-                  <h2 className="text-[14px] overflow-hidden whitespace-nowrap overflow-ellipsis">
+              </td>
+              <td>{index + 1}</td>
+              <td>
+                <div className="py-1">
+                  <p className="!font-semibold text-base md:text-lg">
                     {item.name}
-                  </h2>
-                  <h3 className="text-[10px] text-[#545454] overflow-hidden whitespace-nowrap overflow-ellipsis">
-                    {item.class}
-                  </h3>
+                  </p>
+                  <p className="text-sm md:text-base">{item.class}</p>
                 </div>
+              </td>
+              <td>
                 <div className="w-[24px] h-[24px]">
                   <img className="w-[24px] h-[24px]" src="/medal.png" alt="" />
                 </div>
-                <div className="w-[62px] pl-2">
-                  <p className="text-[12px]">{item.exp} exp</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+              </td>
+              <td className="!font-semibold text-base md:text-xl">
+                {item.exp} exp
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

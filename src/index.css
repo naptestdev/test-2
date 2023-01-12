@@ -3,9 +3,22 @@
 @tailwind utilities;
 
 body {
-  @apply m-0 min-h-screen bg-[#1E1E1E] text-white;
+  @apply m-0 bg-[#F9F9F9] text-gray-900;
 }
 
 #root {
-  @apply min-h-screen flex justify-center items-center;
+  @apply flex justify-center mx-2 md:mx-6;
+}
+
+tr td:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+tr td:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+tr td {
+  @apply bg-white;
 }
