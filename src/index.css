@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply m-0 bg-[#F9F9F9] text-gray-900;
+  @apply m-0 bg-[#18191A] text-gray-100;
 }
 
 #root {
@@ -20,5 +20,5 @@ tr td:last-child {
 }
 
 tr td {
-  @apply bg-white;
+  @apply bg-[#242526] drop-shadow-md shadow-white;
 }
