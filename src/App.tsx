@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { randomAvatar } from "./utils";
 import useSWR from "swr";
 import { Data } from "./types";
 
@@ -11,11 +10,12 @@ export default function App() {
   );
 
   const [currentTab, setCurrentTab] = useState("Tổng");
+  const [currentCourse, setCurrentCourse] = useState("Tất cả");
 
   if (isLoading || !data)
     return (
       <div className="min-h-screen flex justify-center items-center">
-        <div className="w-8 h-8 rounded-full border-[3px] border-sky-600 border-t-transparent animate-spin"></div>
+        <div className="w-8 h-8 rounded-full border-[3px] border-white border-t-transparent animate-spin"></div>
       </div>
     );
 
@@ -28,74 +28,39 @@ export default function App() {
 
   return (
     <div className="w-full max-w-4xl">
+      <div className="flex justify-center mt-[17px]">
+        <img className="h-[80px] w-auto" src="/mindx-logo.png" alt="" />
+      </div>
       <div>
-        <h1 className="text-3xl md:text-5xl mt-8 mb-4 md:mt-16 md:mb-8">
-          Global Ranking
+        <h1 className="text-[20px] md:text-[40px] mt-[49px] mb-8 uppercase text-center">
+          Bảng xếp hạng tổng
         </h1>
       </div>
-      <div className="flex gap-5">
-        {data
-          ?.sort(
-            // @ts-ignore
-            (a, b) =>
-              // @ts-ignore
-              +String(b.points[currentTab]).replace(",", ".") -
-              // @ts-ignore
-              +String(a.points[currentTab]).replace(",", ".")
-          )
-          .slice(0, 3)
-          .map((item, index) => (
-            <div
-              key={`${item.name}-${item.class}-${currentTab}`}
-              className="flex-grow flex flex-col justify-end items-center"
-            >
-              <div className="flex flex-col items-center relative pt-[40px]">
-                {index === 1 && (
-                  <img
-                    className="absolute left-1/2 -translate-x-1/2 top-0 w-[54px] h-[46px] z-10"
-                    src="/crown.svg"
-                    alt=""
-                  />
-                )}
-                <div className="pb-1 relative">
-                  <div
-                    className={`absolute bottom-0 left-1/2 -translate-x-1/2 leading-[16px] text-[12px] h-[16px] w-[16px] text-center text-white ${
-                      ["bg-red", "bg-yellow", "bg-orange"][index]
-                    } rounded-full box-content`}
-                  >
-                    {[2, 1, 3][index]}
-                  </div>
-                  <img
-                    src={randomAvatar(`${item.name} ${item.class}`)}
-                    className={`${
-                      index === 1
-                        ? "w-[80px] h-[80px] md:w-[120px] md:h-[120px]"
-                        : "w-[60px] h-[60px] md:w-[90px] md:h-[90px]"
-                    } rounded-full border-4 ${
-                      ["border-red", "border-yellow", "border-orange"][index]
-                    }`}
-                    alt=""
-                  />
-                </div>
-                <p className="text-center text-lg mt-1">{item.name}</p>
-                <h1
-                  className={`${
-                    ["text-red", "text-yellow", "text-orange"][index]
-                  }`}
-                >
-                  {/* @ts-ignore */}
-                  {+String(item.points[currentTab]).replace(",", ".")} exp
-                </h1>
-              </div>
-            </div>
-          ))}
-      </div>
 
-      <div className="flex gap-2 flex-wrap mt-8 [&_button]:py-[6px] [&_button]:px-3 [&_button]:bg-[#3A3B3C] [&_button]:rounded-md [&_button]:transition">
+      <div className="flex gap-2 flex-wrap items-center mt-8">
+        <p>Khoá học: </p>
+
+        {["Tất cả", "Scratch", "Game", "JavaScript"].map((item) => (
+          <button
+            key={item}
+            onClick={() => setCurrentCourse(item)}
+            className={`${
+              currentCourse === item ? "!bg-white !text-bg" : ""
+            } py-1 px-2 bg-[#ffffff1a] rounded-full transition`}
+          >
+            {item}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-2 flex-wrap items-center mt-8">
+        <p>Buổi học: </p>
         {Object.keys(data[0].points).map((item) => (
           <button
+            key={item}
             onClick={() => setCurrentTab(item)}
-            className={currentTab === item ? "!bg-red" : ""}
+            className={`${
+              currentTab === item ? "!bg-white !text-bg" : ""
+            } py-1 px-2 bg-[#ffffff1a] rounded-full transition`}
           >
             {item}
           </button>
@@ -103,7 +68,7 @@ export default function App() {
       </div>
       <table className="w-full border-separate [&_th]:!text-left border-spacing-y-3 my-5">
         <thead>
-          <tr>
+          <tr className="!text-white">
             <th></th>
             <th>#</th>
             <th></th>
@@ -134,7 +99,8 @@ export default function App() {
                         //   : item.newStatus === "down"
                         //   ? "/down.png"
                         // :
-                        "/equal.png"
+                        // "/equal.png"
+                        "/up.png"
                       }
                       className="w-[18px]"
                       alt=""
