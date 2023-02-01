@@ -10,12 +10,18 @@ body {
   @apply flex justify-center mx-2 md:mx-6;
 }
 
-tr td:first-child {
+tr:first-child td:first-child {
   border-top-left-radius: 6px;
+}
+tr:first-child td:last-child {
+  border-top-right-radius: 6px;
+}
+
+tr:last-child td:first-child {
   border-bottom-left-radius: 6px;
 }
-tr td:last-child {
-  border-top-right-radius: 6px;
+
+tr:last-child td:last-child {
   border-bottom-right-radius: 6px;
 }
 
@@ -24,5 +30,5 @@ tr td {
 }
 
 tr {
-  @apply drop-shadow-md shadow-white text-[#464646];
+  @apply text-[#464646];
 }
