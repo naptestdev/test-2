@@ -29,16 +29,45 @@ export default function App() {
 
   return (
     <div className="w-full max-w-[1196px]">
-      <div className="flex justify-center mt-[17px]">
-        <img className="h-[80px] w-auto" src="/mindx-logo.png" alt="" />
+      <div className="flex justify-between mt-[17px]">
+        <div className="block md:hidden ml-2">
+          <div className="relative">
+            <img
+              className="absolute top-1/2 -translate-y-1/2 left-2 w-[14px] h-[14px]"
+              src="/search.svg"
+              alt=""
+            />
+            <input
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              className="w-[158px] border border-white rounded-full py-[2px] pl-7 pr-8 bg-transparent placeholder:text-[#ffffff80] outline-none"
+              type="text"
+              placeholder="Tìm kiếm..."
+            />
+            {!!searchKeyword && (
+              <img
+                onClick={() => setSearchKeyword("")}
+                className="absolute top-1/2 -translate-y-1/2 right-2 w-[26px] h-[26px] cursor-pointer"
+                src="/x.svg"
+                alt=""
+              />
+            )}
+          </div>
+        </div>
+
+        <img
+          className="h-[34px] md:h-[80px] w-auto"
+          src="/mindx-logo.png"
+          alt=""
+        />
       </div>
-      <div>
+      <div className="md:block hidden">
         <h1 className="text-[20px] md:text-[40px] my-[30px] md:my-[56px] uppercase text-center">
           Bảng xếp hạng tổng
         </h1>
       </div>
 
-      <div className="flex flex-wrap justify-between gap-2">
+      <div className="flex flex-col md:flex-row md:flex-wrap justify-between gap-2 px-2 py-8 md:px-0 md:py-0">
         <div className="flex flex-wrap items-center gap-2">
           <p>Khoá học: </p>
 
@@ -72,7 +101,7 @@ export default function App() {
             ))}
           </div>
         </div>
-        <div>
+        <div className="hidden md:block">
           <div className="relative">
             <img
               className="absolute top-1/2 -translate-y-1/2 left-2 w-[14px] h-[14px]"
@@ -98,15 +127,25 @@ export default function App() {
         </div>
       </div>
 
-      <table className="w-full [&_th]:!text-left my-5">
-        <thead>
-          <tr className="!text-white">
-            <th className="pl-[3vw] md:pl-[10vw] py-2">#</th>
+      <div className="md:hidden block">
+        <h1 className="text-[20px] md:text-[40px] uppercase text-center">
+          Bảng xếp hạng tổng
+        </h1>
+
+        <div className="flex justify-center">
+          <img className="w-[279px] h-[162px]" src="/top-3.png" alt="" />
+        </div>
+      </div>
+
+      <table className="w-full [&_th]:!text-left my-5 md:border-spacing-0 border-spacing-y-[6px] md:border-collapse border-separate">
+        <thead className="md:table-header-group hidden">
+          <tr className="!text-white rounded-[6px] md:rounded-none">
+            <th className="pl-[3vw] md:pl-[7vw] py-2">#</th>
             <th>Khoá học</th>
             <th>Tên học viên</th>
             <th>Mã lớp</th>
             <th>Huy hiệu</th>
-            <th className="pr-[3vw] md:pr-[10vw]">Điểm</th>
+            <th className="pr-[3vw] md:pr-[7vw]">Điểm</th>
           </tr>
         </thead>
         <tbody>
@@ -120,7 +159,7 @@ export default function App() {
             )
             .map((item, index) => (
               <tr
-                className={`rounded-2xl ${
+                className={`${
                   !searchKeyword ||
                   item.name
                     .toLowerCase()
@@ -131,8 +170,8 @@ export default function App() {
                 }`}
                 key={`${item.name}-${item.class}`}
               >
-                <td className="pl-[3vw] md:pl-[10vw] py-2">
-                  <div className="flex items-center gap-[14px]">
+                <td className="pl-[3vw] md:pl-[7vw] py-2 md:rounded-none rounded-l-[6px]">
+                  <div className="flex items-center gap-[11px] md:gap-[14px]">
                     <img
                       src={
                         // item.newStatus === "up"
@@ -143,24 +182,29 @@ export default function App() {
                         // "/equal.png"
                         "/up.png"
                       }
-                      className="w-[24px] h-[24px]"
+                      className="w-[12px] h-[12px] md:w-[24px] md:h-[24px]"
                       alt=""
                     />
-                    <span className="text-[28px]">{index + 1}</span>
+                    <span className="text-[14px] font-semibold md:text-[28px]">
+                      {index + 1}
+                    </span>
                   </div>
                 </td>
                 <td>
-                  <img
-                    className="w-[32px] h-[32px]"
-                    src="/scratch.png"
-                    alt=""
-                  />
+                  <div className="md:w-[32px] md:h-[32px] w-[20px] h-[20px]">
+                    <img
+                      className="md:w-[32px] md:h-[32px] w-[20px] h-[20px]"
+                      src="/scratch.png"
+                      alt=""
+                    />
+                  </div>
                 </td>
                 <td>
                   <p className="text-base md:text-lg">{item.name}</p>
+                  <p className="text-sm block md:hidden">{item.class}</p>
                 </td>
 
-                <td>
+                <td className="md:table-cell hidden">
                   <p className="text-base md:text-lg">{item.class}</p>
                 </td>
                 <td>
@@ -172,14 +216,14 @@ export default function App() {
                         alt=""
                       />
                     </div>
-                    <div className="w-[24px] h-[24px]">
+                    <div className="w-[24px] h-[24px] hidden md:block">
                       <img
                         className="w-[24px] h-[24px]"
                         src="/medal.png"
                         alt=""
                       />
                     </div>
-                    <div className="w-[24px] h-[24px]">
+                    <div className="w-[24px] h-[24px] hidden md:block">
                       <img
                         className="w-[24px] h-[24px]"
                         src="/medal.png"
@@ -188,7 +232,7 @@ export default function App() {
                     </div>
                   </div>
                 </td>
-                <td className="!font-semibold text-base md:text-xl pr-[3vw] md:pr-[6vw]">
+                <td className="!font-semibold text-base md:text-xl pr-[3vw] md:pr-[6vw] md:rounded-none rounded-r-[6px]">
                   {/* @ts-ignore */}
                   {+String(item.points[currentTab]).replace(",", ".")} exp
                 </td>
