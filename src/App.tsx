@@ -1,17 +1,37 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
 import { Data } from "./types";
+import useMediaQuery from "./hooks/useMediaQuery";
+import { InView } from "react-intersection-observer";
+import useSWRInfinite from "swr/infinite";
 
 export default function App() {
-  const { data, isLoading, error } = useSWR<Data>("home", () =>
-    fetch(`https://ionian-green-basket.glitch.me/data-ver2.json`).then((res) =>
-      res.json()
-    )
+  const {
+    data: rawData,
+    isLoading,
+    error,
+    size,
+    setSize,
+  } = useSWRInfinite<Data>(
+    (pageIndex) => `${pageIndex}`,
+    () =>
+      fetch(`https://ionian-green-basket.glitch.me/data-ver2.json`).then(
+        (res) => res.json()
+      )
   );
+
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const [currentTab, setCurrentTab] = useState("1");
   const [currentCourse, setCurrentCourse] = useState("Tất cả");
   const [searchKeyword, setSearchKeyword] = useState("");
+
+  const [isViewMore, setIsViewMore] = useState(false);
+
+  const data = useMemo(
+    () => rawData?.reduce((acc, current) => [...acc, ...current], []),
+    [JSON.stringify(rawData)]
+  );
 
   if (isLoading || !data)
     return (
@@ -29,7 +49,7 @@ export default function App() {
 
   return (
     <div className="w-full max-w-[1196px]">
-      <div className="flex justify-between mt-[17px]">
+      <div className="flex justify-between md:justify-center mt-[17px]">
         <div className="block md:hidden ml-2">
           <div className="relative">
             <img
@@ -137,7 +157,7 @@ export default function App() {
         </div>
       </div>
 
-      <table className="w-full [&_th]:!text-left my-5 md:border-spacing-0 border-spacing-y-[6px] md:border-collapse border-separate">
+      <table className="w-full [&_th]:!text-left mt-5 mb-[14px] md:border-spacing-0 border-spacing-y-[6px] md:border-collapse border-separate">
         <thead className="md:table-header-group hidden">
           <tr className="!text-white rounded-[6px] md:rounded-none">
             <th className="pl-[3vw] md:pl-[7vw] py-2">#</th>
@@ -149,15 +169,8 @@ export default function App() {
           </tr>
         </thead>
         <tbody>
-          {data
-            .sort(
-              (a, b) =>
-                // @ts-ignore
-                +String(b.points[currentTab]).replace(",", ".") -
-                // @ts-ignore
-                +String(a.points[currentTab]).replace(",", ".")
-            )
-            .map((item, index) => (
+          {(isDesktop || isViewMore ? data : data.slice(0, 3)).map(
+            (item, index) => (
               <tr
                 className={`${
                   !searchKeyword ||
@@ -167,6 +180,12 @@ export default function App() {
                   item.class.toLowerCase().includes(searchKeyword.toLowerCase())
                     ? ""
                     : "hidden"
+                } ${
+                  index === 0
+                    ? "md:[&_td]:pt-[19px]"
+                    : index === data.length - 1
+                    ? "md:[&_td]:pb-[19px]"
+                    : ""
                 }`}
                 key={`${item.name}-${item.class}`}
               >
@@ -237,9 +256,41 @@ export default function App() {
                   {+String(item.points[currentTab]).replace(",", ".")} exp
                 </td>
               </tr>
-            ))}
+            )
+          )}
         </tbody>
       </table>
+      {!isDesktop && !isViewMore && (
+        <div className="flex justify-center">
+          <button
+            onClick={() => setIsViewMore(true)}
+            className="flex items-center gap-1 py-1 px-[10px] bg-[#ffffff33] border border-white rounded"
+          >
+            <span>Xem thêm</span>
+            <img src="/chevron-down.svg" alt="" />
+          </button>
+        </div>
+      )}
+      {(isDesktop || isViewMore) && (
+        <div className="flex justify-center mt-4 mb-6">
+          <InView
+            onChange={(inView) => {
+              if (inView) {
+                if (rawData?.length === size) {
+                  setSize(size + 1);
+                }
+              }
+            }}
+          >
+            {({ ref }) => (
+              <div className="flex justify-center items-center gap-2" ref={ref}>
+                <div className="w-6 h-6 rounded-full border-[3px] border-white border-t-transparent animate-spin"></div>
+                <p>Đang tải...</p>
+              </div>
+            )}
+          </InView>
+        </div>
+      )}
     </div>
   );
 }
