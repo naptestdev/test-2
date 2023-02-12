@@ -165,7 +165,7 @@ export default function App() {
             <th>Tên học viên</th>
             <th>Mã lớp</th>
             <th>Huy hiệu</th>
-            <th className="pr-[3vw] md:pr-[7vw]">Điểm</th>
+            <th className="md:pr-[3vw]">Điểm</th>
           </tr>
         </thead>
         <tbody>
@@ -251,7 +251,7 @@ export default function App() {
                     </div>
                   </div>
                 </td>
-                <td className="!font-semibold text-base md:text-xl pr-[3vw] md:pr-[6vw] md:rounded-none rounded-r-[6px]">
+                <td className="!font-semibold text-base md:text-xl md:pr-[3vw] md:rounded-none rounded-r-[6px]">
                   {/* @ts-ignore */}
                   {+String(item.points[currentTab]).replace(",", ".")} exp
                 </td>
