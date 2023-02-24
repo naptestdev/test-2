@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply m-0 bg-[linear-gradient(180deg,_#E31F26_30.09%,_#F68B1F_100%)] md:bg-bg text-white min-h-screen;
+  @apply m-0 bg-bg text-white min-h-screen;
 }
 
 #root {

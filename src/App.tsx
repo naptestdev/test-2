@@ -1,51 +1,50 @@
 import { useMemo, useState } from "react";
-import useSWR from "swr";
 import { Data } from "./types";
 import useMediaQuery from "./hooks/useMediaQuery";
 import { InView } from "react-intersection-observer";
-import useSWRInfinite from "swr/infinite";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export default function App() {
-  const {
-    data: rawData,
-    isLoading,
-    error,
-    size,
-    setSize,
-  } = useSWRInfinite<Data>(
-    (pageIndex) => `${pageIndex}`,
-    () =>
-      fetch(`https://ionian-green-basket.glitch.me/data-ver2.json`).then(
-        (res) => res.json()
-      )
-  );
-
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const [currentTab, setCurrentTab] = useState("1");
-  const [currentCourse, setCurrentCourse] = useState("Tất cả");
+  const [currentCourse, setCurrentCourse] = useState<
+    "Scratch" | "Game" | "Web"
+  >("Scratch");
+  const [currentLevel, setCurrentLevel] = useState<
+    "Basic" | "Advanced" | "Intensive"
+  >("Basic");
   const [searchKeyword, setSearchKeyword] = useState("");
+
+  const {
+    data: rawData,
+    error,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: [currentCourse, currentLevel, currentTab],
+    queryFn: ({ pageParam }) =>
+      fetch(
+        new URL(
+          `/${currentCourse}/${currentLevel}/${currentTab}?page=${
+            pageParam || 0
+          }`,
+          import.meta.env.VITE_SERVER_URL
+        )
+      ).then((res) => res.json()),
+    getNextPageParam: (lastPage, pages) => {
+      // @ts-ignore
+      return lastPage.length === 0 ? null : pages.length;
+    },
+  });
 
   const [isViewMore, setIsViewMore] = useState(false);
 
-  const data = useMemo(
-    () => rawData?.reduce((acc, current) => [...acc, ...current], []),
+  const data = useMemo<Data>(
+    // @ts-ignore
+    () => rawData?.pages?.reduce((acc, current) => [...acc, ...current], []),
     [JSON.stringify(rawData)]
   );
-
-  if (isLoading || !data)
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="w-8 h-8 rounded-full border-[3px] border-white border-t-transparent animate-spin"></div>
-      </div>
-    );
-
-  if (error)
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <h1 className="text-4xl">Error</h1>
-      </div>
-    );
 
   return (
     <div className="w-full max-w-[1196px]">
@@ -92,10 +91,12 @@ export default function App() {
           <p>Khoá học: </p>
 
           <div className="flex flex-wrap items-center bg-[#ffffff1a] rounded-full">
-            {["Tất cả", "Scratch", "Game", "JavaScript"].map((item) => (
+            {["Scratch", "Game", "Web"].map((item) => (
               <button
                 key={item}
-                onClick={() => setCurrentCourse(item)}
+                onClick={() =>
+                  setCurrentCourse(item as "Scratch" | "Game" | "Web")
+                }
                 className={`${
                   currentCourse === item ? "!bg-white !text-bg" : ""
                 } py-[2px] px-2 rounded-full transition`}
@@ -106,19 +107,41 @@ export default function App() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <p>Buổi học: </p>
+          <p>Cấp độ: </p>
+
           <div className="flex flex-wrap items-center bg-[#ffffff1a] rounded-full">
-            {Object.keys(data[0].points).map((item) => (
+            {["Basic", "Advanced", "Intensive"].map((item) => (
               <button
                 key={item}
-                onClick={() => setCurrentTab(item)}
+                onClick={() =>
+                  setCurrentLevel(item as "Basic" | "Advanced" | "Intensive")
+                }
                 className={`${
-                  currentTab === item ? "!bg-white !text-bg" : ""
+                  currentLevel === item ? "!bg-white !text-bg" : ""
                 } py-[2px] px-2 rounded-full transition`}
               >
                 {item}
               </button>
             ))}
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <p>Buổi học: </p>
+          <div className="flex flex-wrap items-center bg-[#ffffff1a] rounded-full">
+            {new Array(8)
+              .fill("")
+              .map((_, index) => `${index + 1}`)
+              .map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setCurrentTab(item)}
+                  className={`${
+                    currentTab === item ? "!bg-white !text-bg" : ""
+                  } py-[2px] px-2 rounded-full transition`}
+                >
+                  {item}
+                </button>
+              ))}
           </div>
         </div>
         <div className="hidden md:block">
@@ -157,110 +180,123 @@ export default function App() {
         </div>
       </div>
 
-      <table className="w-full [&_th]:!text-left mt-5 mb-[14px] md:border-spacing-0 border-spacing-y-[6px] md:border-collapse border-separate">
-        <thead className="md:table-header-group hidden">
-          <tr className="!text-white rounded-[6px] md:rounded-none">
-            <th className="pl-[3vw] md:pl-[7vw] py-2">#</th>
-            <th>Khoá học</th>
-            <th>Tên học viên</th>
-            <th>Mã lớp</th>
-            <th>Huy hiệu</th>
-            <th className="md:pr-[3vw]">Điểm</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(isDesktop || isViewMore ? data : data.slice(0, 3)).map(
-            (item, index) => (
-              <tr
-                className={`${
-                  !searchKeyword ||
-                  item.name
-                    .toLowerCase()
-                    .includes(searchKeyword.toLowerCase()) ||
-                  item.class.toLowerCase().includes(searchKeyword.toLowerCase())
-                    ? ""
-                    : "hidden"
-                } ${
-                  index === 0
-                    ? "md:[&_td]:pt-[19px]"
-                    : index === data.length - 1
-                    ? "md:[&_td]:pb-[19px]"
-                    : ""
-                }`}
-                key={`${item.name}-${item.class}`}
-              >
-                <td className="pl-[3vw] md:pl-[7vw] py-2 md:rounded-none rounded-l-[6px]">
-                  <div className="flex items-center gap-[11px] md:gap-[14px]">
-                    <img
-                      src={
-                        // item.newStatus === "up"
-                        //   ? "/up.png"
-                        //   : item.newStatus === "down"
-                        //   ? "/down.png"
-                        // :
-                        // "/equal.png"
-                        "/up.png"
-                      }
-                      className="w-[12px] h-[12px] md:w-[24px] md:h-[24px]"
-                      alt=""
-                    />
-                    <span className="text-[14px] font-semibold md:text-[28px]">
-                      {index + 1}
-                    </span>
-                  </div>
-                </td>
-                <td>
-                  <div className="md:w-[32px] md:h-[32px] w-[20px] h-[20px]">
-                    <img
-                      className="md:w-[32px] md:h-[32px] w-[20px] h-[20px]"
-                      src="/scratch.png"
-                      alt=""
-                    />
-                  </div>
-                </td>
-                <td>
-                  <p className="text-base md:text-lg">{item.name}</p>
-                  <p className="text-sm block md:hidden">{item.class}</p>
-                </td>
+      {!data || !rawData?.pages.length ? (
+        <div className="min-h-[50vh] flex justify-center items-center">
+          <div className="w-8 h-8 rounded-full border-[3px] border-white border-t-transparent animate-spin"></div>
+        </div>
+      ) : error ? (
+        <div className="min-h-[50vh] flex justify-center items-center">
+          <h1 className="text-4xl">Error</h1>
+        </div>
+      ) : (
+        <table className="w-full [&_th]:!text-left mt-5 mb-[14px] md:border-spacing-0 border-spacing-y-[6px] md:border-collapse border-separate">
+          <thead className="md:table-header-group hidden">
+            <tr className="!text-white rounded-[6px] md:rounded-none">
+              <th className="pl-[3vw] md:pl-[7vw] py-2">#</th>
+              <th>Khoá học</th>
+              <th>Tên học viên</th>
+              <th>Mã lớp</th>
+              <th>Huy hiệu</th>
+              <th className="md:pr-[3vw]">Điểm</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(isDesktop || isViewMore ? data : data.slice(0, 3)).map(
+              (item, index) => (
+                <tr
+                  className={`${
+                    !searchKeyword ||
+                    item.name
+                      .toLowerCase()
+                      .includes(searchKeyword.toLowerCase()) ||
+                    item.class
+                      .toLowerCase()
+                      .includes(searchKeyword.toLowerCase())
+                      ? ""
+                      : "hidden"
+                  } ${
+                    index === 0
+                      ? "md:[&_td]:pt-[19px]"
+                      : index === data.length - 1
+                      ? "md:[&_td]:pb-[19px]"
+                      : ""
+                  }`}
+                  key={`${item.name}-${item.class}`}
+                >
+                  <td className="pl-[3vw] md:pl-[7vw] py-2 md:rounded-none rounded-l-[6px]">
+                    <div className="flex items-center gap-[11px] md:gap-[14px]">
+                      <img
+                        src={
+                          // item.newStatus === "up"
+                          //   ? "/up.png"
+                          //   : item.newStatus === "down"
+                          //   ? "/down.png"
+                          // :
+                          // "/equal.png"
+                          "/up.png"
+                        }
+                        className="w-[12px] h-[12px] md:w-[24px] md:h-[24px]"
+                        alt=""
+                      />
+                      <span className="text-[14px] font-semibold md:text-[28px]">
+                        {index + 1}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="md:w-[32px] md:h-[32px] w-[20px] h-[20px]">
+                      <img
+                        className="md:w-[32px] md:h-[32px] w-[20px] h-[20px]"
+                        src="/scratch.png"
+                        alt=""
+                      />
+                    </div>
+                  </td>
+                  <td>
+                    <p className="text-base md:text-lg">{item.name}</p>
+                    <p className="text-sm block md:hidden">{item.class}</p>
+                  </td>
 
-                <td className="md:table-cell hidden">
-                  <p className="text-base md:text-lg">{item.class}</p>
-                </td>
-                <td>
-                  <div className="flex gap-1">
-                    <div className="w-[24px] h-[24px]">
-                      <img
-                        className="w-[24px] h-[24px]"
-                        src="/medal.png"
-                        alt=""
-                      />
+                  <td className="md:table-cell hidden">
+                    <p className="text-base md:text-lg">{item.class}</p>
+                  </td>
+                  <td>
+                    <div className="flex gap-1">
+                      <div className="w-[24px] h-[24px]">
+                        <img
+                          className="w-[24px] h-[24px]"
+                          src="/medal.png"
+                          alt=""
+                        />
+                      </div>
+                      <div className="w-[24px] h-[24px] hidden md:block">
+                        <img
+                          className="w-[24px] h-[24px]"
+                          src="/medal.png"
+                          alt=""
+                        />
+                      </div>
+                      <div className="w-[24px] h-[24px] hidden md:block">
+                        <img
+                          className="w-[24px] h-[24px]"
+                          src="/medal.png"
+                          alt=""
+                        />
+                      </div>
                     </div>
-                    <div className="w-[24px] h-[24px] hidden md:block">
-                      <img
-                        className="w-[24px] h-[24px]"
-                        src="/medal.png"
-                        alt=""
-                      />
-                    </div>
-                    <div className="w-[24px] h-[24px] hidden md:block">
-                      <img
-                        className="w-[24px] h-[24px]"
-                        src="/medal.png"
-                        alt=""
-                      />
-                    </div>
-                  </div>
-                </td>
-                <td className="!font-semibold text-base md:text-xl md:pr-[3vw] md:rounded-none rounded-r-[6px]">
-                  {/* @ts-ignore */}
-                  {+String(item.points[currentTab]).replace(",", ".")} exp
-                </td>
-              </tr>
-            )
-          )}
-        </tbody>
-      </table>
-      {!isDesktop && !isViewMore && (
+                  </td>
+                  <td className="!font-semibold text-base md:text-xl md:pr-[3vw] md:rounded-none rounded-r-[6px]">
+                    {/* @ts-ignore */}
+                    {+String(item.point).replace(",", ".")} exp
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      )}
+
+      {!isDesktop && !isViewMore && !!data && (
         <div className="flex justify-center">
           <button
             onClick={() => setIsViewMore(true)}
@@ -271,13 +307,13 @@ export default function App() {
           </button>
         </div>
       )}
-      {(isDesktop || isViewMore) && (
+      {(isDesktop || isViewMore) && hasNextPage && !searchKeyword.trim() && (
         <div className="flex justify-center mt-4 mb-6">
           <InView
             onChange={(inView) => {
               if (inView) {
-                if (rawData?.length === size) {
-                  setSize(size + 1);
+                if (hasNextPage) {
+                  fetchNextPage();
                 }
               }
             }}
