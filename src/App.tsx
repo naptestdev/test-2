@@ -7,7 +7,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 export default function App() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  const [currentTab, setCurrentTab] = useState("1");
+  const [currentTab, setCurrentTab] = useState("Total");
   const [currentCourse, setCurrentCourse] = useState<
     "Scratch" | "Game" | "Web"
   >("Scratch");
@@ -142,6 +142,14 @@ export default function App() {
                   {item}
                 </button>
               ))}
+            <button
+              onClick={() => setCurrentTab("Total")}
+              className={`${
+                currentTab === "Total" ? "!bg-white !text-bg" : ""
+              } py-[2px] px-2 rounded-full transition`}
+            >
+              Tổng
+            </button>
           </div>
         </div>
         <div className="hidden md:block">
