@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
-import { Data } from "./types";
+import { useEffect, useMemo, useState } from "react";
+import { Data } from "./shared/types";
 import useMediaQuery from "./hooks/useMediaQuery";
 import { InView } from "react-intersection-observer";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "react-query";
+import { BADGE_NAMES } from "./shared/constants";
 
 export default function App() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -15,6 +16,12 @@ export default function App() {
     "Basic" | "Advanced" | "Intensive"
   >("Basic");
   const [searchKeyword, setSearchKeyword] = useState("");
+
+  const [currentlyExpandedStudent, setCurrentlyExpandedStudent] = useState(-1);
+
+  useEffect(() => {
+    setCurrentlyExpandedStudent(-1);
+  }, [currentTab, currentCourse, currentLevel, searchKeyword]);
 
   const {
     data: rawData,
@@ -211,93 +218,112 @@ export default function App() {
           <tbody>
             {(isDesktop || isViewMore ? data : data.slice(0, 3)).map(
               (item, index) => (
-                <tr
-                  className={`${
-                    !searchKeyword ||
-                    item.name
-                      .toLowerCase()
-                      .includes(searchKeyword.toLowerCase()) ||
-                    item.class
-                      .toLowerCase()
-                      .includes(searchKeyword.toLowerCase())
-                      ? ""
-                      : "hidden"
-                  } ${
-                    index === 0
-                      ? "md:[&_td]:pt-[19px]"
-                      : index === data.length - 1
-                      ? "md:[&_td]:pb-[19px]"
-                      : ""
-                  }`}
-                  key={`${item.name}-${item.class}`}
-                >
-                  <td className="pl-[3vw] md:pl-[7vw] py-2 md:rounded-none rounded-l-[6px]">
-                    <div className="flex items-center gap-[11px] md:gap-[14px]">
-                      <img
-                        src={
-                          // item.newStatus === "up"
-                          //   ? "/up.png"
-                          //   : item.newStatus === "down"
-                          //   ? "/down.png"
-                          // :
-                          // "/equal.png"
-                          "/up.png"
-                        }
-                        className="w-[12px] h-[12px] md:w-[24px] md:h-[24px]"
-                        alt=""
-                      />
-                      <span className="text-[14px] font-semibold md:text-[28px]">
-                        {index + 1}
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="md:w-[32px] md:h-[32px] w-[20px] h-[20px]">
-                      <img
-                        className="md:w-[32px] md:h-[32px] w-[20px] h-[20px]"
-                        src="/scratch.png"
-                        alt=""
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <p className="text-base md:text-lg">{item.name}</p>
-                    <p className="text-sm block md:hidden">{item.class}</p>
-                  </td>
+                <>
+                  <tr
+                    className={`${
+                      !searchKeyword ||
+                      item.name
+                        .toLowerCase()
+                        .includes(searchKeyword.toLowerCase()) ||
+                      item.class
+                        .toLowerCase()
+                        .includes(searchKeyword.toLowerCase())
+                        ? ""
+                        : "hidden"
+                    } ${
+                      index === 0
+                        ? "md:[&_td]:pt-[19px]"
+                        : index === data.length - 1
+                        ? "md:[&_td]:pb-[19px]"
+                        : ""
+                    }`}
+                    key={`${item.name}-${item.class}-${currentCourse}-${currentLevel}-${currentTab}-${index}`}
+                  >
+                    <td className="pl-[3vw] md:pl-[7vw] py-2 md:rounded-none rounded-l-[6px]">
+                      <div className="flex items-center gap-[11px] md:gap-[14px]">
+                        <img
+                          src={"/up.png"}
+                          className="w-[12px] h-[12px] md:w-[24px] md:h-[24px]"
+                          alt=""
+                        />
+                        <span className="text-[14px] font-semibold md:text-[28px]">
+                          {index + 1}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="md:w-[32px] md:h-[32px] w-[20px] h-[20px]">
+                        <img
+                          className="md:h-[32px] w-auto h-[20px]"
+                          src={
+                            currentCourse === "Scratch"
+                              ? "scratch.png"
+                              : currentCourse === "Game"
+                              ? "game-maker-icon.png"
+                              : "web-icon.png"
+                          }
+                          alt=""
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <p className="text-base md:text-lg">{item.name}</p>
+                      <p className="text-sm block md:hidden">{item.class}</p>
+                    </td>
 
-                  <td className="md:table-cell hidden">
-                    <p className="text-base md:text-lg">{item.class}</p>
-                  </td>
-                  <td>
-                    <div className="flex gap-1">
-                      <div className="w-[24px] h-[24px]">
-                        <img
-                          className="w-[24px] h-[24px]"
-                          src="/medal.png"
-                          alt=""
-                        />
+                    <td className="md:table-cell hidden">
+                      <p className="text-base md:text-lg">{item.class}</p>
+                    </td>
+                    <td>
+                      <div className="flex gap-1">
+                        {item.badges.map((badge) => (
+                          <div
+                            onClick={() =>
+                              currentlyExpandedStudent === index
+                                ? setCurrentlyExpandedStudent(-1)
+                                : setCurrentlyExpandedStudent(index)
+                            }
+                            className="w-[30px] h-auto cursor-pointer"
+                            key={badge}
+                          >
+                            <img
+                              className="w-[30px] h-auto"
+                              src={`badge-${badge}.png`}
+                              alt=""
+                            />
+                          </div>
+                        ))}
                       </div>
-                      <div className="w-[24px] h-[24px] hidden md:block">
-                        <img
-                          className="w-[24px] h-[24px]"
-                          src="/medal.png"
-                          alt=""
-                        />
-                      </div>
-                      <div className="w-[24px] h-[24px] hidden md:block">
-                        <img
-                          className="w-[24px] h-[24px]"
-                          src="/medal.png"
-                          alt=""
-                        />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="!font-semibold text-base md:text-xl md:pr-[3vw] md:rounded-none rounded-r-[6px]">
-                    {/* @ts-ignore */}
-                    {+String(item.point).replace(",", ".")} exp
-                  </td>
-                </tr>
+                    </td>
+                    <td className="!font-semibold text-base md:text-xl md:pr-[3vw] md:rounded-none rounded-r-[6px]">
+                      {/* @ts-ignore */}
+                      {+String(item.point).replace(",", ".")} exp
+                    </td>
+                  </tr>
+                  {currentlyExpandedStudent === index && (
+                    <tr>
+                      <td colSpan={6}>
+                        <div className="flex gap-5 bg-[#F0F0F0] py-5 px-[3vw] md:px-[7vw]">
+                          {item.badges.map((badge) => (
+                            <div
+                              className="flex flex-col items-center py-5 w-[140px] bg-white border border-[#FFD042] rounded"
+                              key={badge}
+                            >
+                              <img
+                                className="w-[60px] h-auto"
+                                src={`badge-${badge}.png`}
+                                alt=""
+                              />
+                              <p className="text-center">
+                                {BADGE_NAMES[badge - 1]}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               )
             )}
           </tbody>
